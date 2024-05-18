@@ -13,6 +13,9 @@ const typeDefs = `
   
   type Token {
     value: String!
+    username:String
+    id: ID!
+    accountType: String!
   }
 
   type Query {
