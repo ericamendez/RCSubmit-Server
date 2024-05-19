@@ -3,10 +3,10 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
-import { GraphQLError } from 'graphql';
+import { FragmentsOnCompositeTypesRule, GraphQLError } from 'graphql';
 import { fileURLToPath } from 'url';
 import User from '../../models/user.js';
-import { log } from 'console';
+import { log, profile } from 'console';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,10 +15,24 @@ const rootDir = path.join(__dirname, '..', '..')
 const resolvers = {
   Query: {
     dummy: () => 0,
-    user: async (root, args) => {
+    getUser: async (root, args) => {
       const { id } = args
-      const data = await User.findOne({ id })
-      return data
+      const data = await User.findOne({ _id: id })
+
+      console.log(data);
+      console.log(data.username);
+
+      const send = {
+        name: data.name,
+        username: data.username,
+        accountType: data.accountType,
+        profilePicture: data.profilePicture,
+        email: data.email,
+        cohort: data.cohort,
+        pronouns: data.pronouns
+      }
+      console.log(send);
+      return send
     }
   },
   Upload: GraphQLUpload,
@@ -60,14 +74,13 @@ const resolvers = {
           username: user.username,
           id: user._id,
         }
-        console.log(user.username);
 
         return {
           value: jwt.sign(userForToken, process.env.JWT_SECRET),
           username: user.username,
           id: user._id,
           accountType: user.accountType,
-          picture: user.picture
+          profilePicture: user.profilePicture
         }
       } catch (error) {
         throw new Error(error);
@@ -89,9 +102,11 @@ const resolvers = {
       stream.pipe(out);
       console.log(userID)
 
-      const user = await User.findOne({ _id: userID })
-      user.picture = filename
 
+      const user = await User.findOne({ _id: userID })
+      user.profilePicture = filename
+
+      console.log(user)
       try {
         await user.save()
       } catch (error) {

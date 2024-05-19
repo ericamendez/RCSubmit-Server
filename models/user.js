@@ -17,7 +17,7 @@ const schema = new mongoose.Schema({
   name: String,
   email: String,
   pronouns: String,
-  picture: String,
+  profilePicture: String,
   cohort: String,
 })
 

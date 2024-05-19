@@ -18,14 +18,13 @@ const typeDefs = `
     username:String
     id: ID!
     accountType: String!
-    picture: String
+    profilePicture: String
   }
-
 
   type Query {
     dummy: Int
     taskCount: Int!
-    user: User
+    getUser(id: String!): User
   }
 
   type Mutation {
