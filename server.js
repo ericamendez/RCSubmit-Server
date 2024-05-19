@@ -14,6 +14,8 @@ import resolvers from './graphql/resolvers/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+console.log(__dirname);
+
 mongoose.set('strictQuery', false)
 
 dotenv.config()

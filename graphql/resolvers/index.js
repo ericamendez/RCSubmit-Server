@@ -6,10 +6,11 @@ import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import { GraphQLError } from 'graphql';
 import { fileURLToPath } from 'url';
 import User from '../../models/user.js';
+import { log } from 'console';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const rootDir = path.join(__dirname, '..', '..')
 
 const resolvers = {
   Query: {
@@ -61,7 +62,13 @@ const resolvers = {
         }
         console.log(user.username);
 
-        return { value: jwt.sign(userForToken, process.env.JWT_SECRET), username: user.username, id: user._id, accountType: user.accountType }
+        return {
+          value: jwt.sign(userForToken, process.env.JWT_SECRET),
+          username: user.username,
+          id: user._id,
+          accountType: user.accountType,
+          picture: user.picture
+        }
       } catch (error) {
         throw new Error(error);
       }
@@ -76,7 +83,8 @@ const resolvers = {
       const { createReadStream, filename, mimetype, encoding } = await file;
 
       const stream = createReadStream();
-      const filePath = path.join(__dirname, 'uploads', filename);
+      const filePath = path.join(rootDir, 'uploads', filename);
+      console.log(filePath);
       const out = fs.createWriteStream(filePath);
       stream.pipe(out);
       console.log(userID)

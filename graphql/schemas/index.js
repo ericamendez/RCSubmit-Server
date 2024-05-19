@@ -18,6 +18,7 @@ const typeDefs = `
     username:String
     id: ID!
     accountType: String!
+    picture: String
   }
 
 
