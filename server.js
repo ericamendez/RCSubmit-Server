@@ -1,17 +1,22 @@
-const { ApolloServer: ApolloServerExpress } = require('apollo-server-express'); // Import ApolloServer from apollo-server-express with a different name
-const { GraphQLError } = require('graphql')
-const mongoose = require('mongoose')
-const User = require('./models/user')
-const fs = require('fs');
-const path = require("path");
-const cors = require('cors')
-const express = require('express');
-const typeDefs = require('./graphql/schemas/index');
-const resolvers = require('./graphql/resolvers/index');
+import mongoose from 'mongoose';
+import { ApolloServer } from 'apollo-server-express';
+import path from "path";
+import cors from 'cors';
+import express from 'express';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+import typeDefs from './graphql/schemas/index.js';
+import resolvers from './graphql/resolvers/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 mongoose.set('strictQuery', false)
 
-require('dotenv').config()
+dotenv.config()
 
 const MONGODB_URI = process.env.MONGODB_URI
 
@@ -25,7 +30,7 @@ mongoose.connect(MONGODB_URI)
 
 
 async function startApolloServer() {
-  const server = new ApolloServerExpress({
+  const server = new ApolloServer({
     typeDefs,
     resolvers,
   });
@@ -34,6 +39,12 @@ async function startApolloServer() {
 
   const app = express(); // Create an Express app
   app.use(cors())
+
+  // Middleware to handle file uploads using graphql-upload
+  app.use('/graphql', graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
+
+  // Serve the 'uploads' folder statically
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
   // server.applyMiddleware({ app }); // Apply Apollo Server middleware to Express app
 

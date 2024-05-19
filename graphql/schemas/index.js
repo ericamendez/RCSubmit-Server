@@ -1,4 +1,6 @@
 const typeDefs = `
+  scalar Upload
+  
   type User {
     username: String!
     id: ID!
@@ -7,7 +9,7 @@ const typeDefs = `
     name: String
     email: String
     pronouns: String
-    picture: String
+    profilePicture: String
     cohort: String
   }
   
@@ -18,10 +20,11 @@ const typeDefs = `
     accountType: String!
   }
 
+
   type Query {
     dummy: Int
     taskCount: Int!
-    me: User
+    user: User
   }
 
   type Mutation {
@@ -37,7 +40,11 @@ const typeDefs = `
     autogenerate(
       title: String!
     ): String
+    uploadProfilePicture(
+      file: Upload!
+      userID: String!
+    ): String
   }
 `
 
-module.exports = typeDefs
+export default typeDefs

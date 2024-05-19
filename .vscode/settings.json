@@ -1,9 +1,6 @@
 {
     "workbench.colorCustomizations": {
         "iLoveWorkSpaceColors": true,
-        "iLoveWorkSpaceRandom": false,
-        "activityBar.background": "#500165",
-        "titleBar.activeBackground": "#70028D",
-        "titleBar.activeForeground": "#FEFBFF"
+        "iLoveWorkSpaceRandom": false
     }
 }

@@ -1,15 +1,26 @@
-const User = require('../../models/user')
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import path from 'path';
+import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
+import { GraphQLError } from 'graphql';
+import { fileURLToPath } from 'url';
+import User from '../../models/user.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const resolvers = {
   Query: {
     dummy: () => 0,
-    me: (root, args, context) => {
-      return context.currentUser
+    user: async (root, args) => {
+      const { id } = args
+      const data = await User.findOne({ id })
+      return data
     }
   },
-
+  Upload: GraphQLUpload,
   Mutation: {
     createUser: async (root, args) => {
       try {
@@ -60,7 +71,37 @@ const resolvers = {
       console.log("correct place", text);
       return text
     },
+    uploadProfilePicture: async (root, args) => {
+      const { file, userID } = args
+      const { createReadStream, filename, mimetype, encoding } = await file;
+
+      const stream = createReadStream();
+      const filePath = path.join(__dirname, 'uploads', filename);
+      const out = fs.createWriteStream(filePath);
+      stream.pipe(out);
+      console.log(userID)
+
+      const user = await User.findOne({ _id: userID })
+      user.picture = filename
+
+      try {
+        await user.save()
+      } catch (error) {
+        throw new GraphQLError('cant update user picture', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: userID,
+            error
+          }
+        })
+      }
+
+      return new Promise((resolve, reject) => {
+        out.on('finish', () => resolve(`File uploaded: ${filename}`));
+        out.on('error', reject);
+      });
+    }
   }
 }
 
-module.exports = resolvers
+export default resolvers

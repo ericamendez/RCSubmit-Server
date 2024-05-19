@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
   username: {
@@ -7,8 +7,8 @@ const schema = new mongoose.Schema({
     minlength: 3
   },
   password: {
-      type: String,
-      required: true
+    type: String,
+    required: true
   },
   accountType: {
     type: String,
@@ -21,4 +21,4 @@ const schema = new mongoose.Schema({
   cohort: String,
 })
 
-module.exports = mongoose.model('User', schema)
+export default mongoose.model('User', schema)
