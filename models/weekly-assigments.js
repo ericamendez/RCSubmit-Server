@@ -16,8 +16,8 @@ import mongoose from 'mongoose';
 }
 */
 const schema = new mongoose.Schema({
-  name: {
-    type: String,
+  week: {
+    type: Number,
     required: true
   },
   assignments: {
@@ -25,10 +25,11 @@ const schema = new mongoose.Schema({
     /*array of aissignment {
       name
       show?
+      weekID
     }*/
   },
   current: Boolean,
   dueDate: String,
 })
 
-module.exports = mongoose.model('Weekly-assignments', schema)
+export default mongoose.model('Weekly-assignments', schema)

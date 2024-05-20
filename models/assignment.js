@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const assigmentSchema = new mongoose.Schema({
-    name: String,
+    description: String,
+    link: String,
     show: Boolean,
-    weekID: String
+    week: String
 })
 
-module.exports = mongoose.model('Assigment', assignmentSchema)
+export default mongoose.model('Assignment', assigmentSchema)
