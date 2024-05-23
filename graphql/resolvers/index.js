@@ -58,13 +58,14 @@ const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
     addAssignment: async (root, args) => {
-      const { description, link, show, week } = args
+      const { description, link, show, week, assignmentType } = args
       // console.log(description, link, show, week)
       const newAssignment = new Assignment({
         description,
         link,
         show,
-        week
+        week,
+        assignmentType
       })
 
       const weekly = await WeeklyAssignments.findOne({ week: week })
@@ -78,6 +79,27 @@ const resolvers = {
         return newAssignment
       } catch (error) {
         throw new GraphQLError('cant save assignment', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args,
+            error
+          }
+        })
+      }
+    },
+    deleteAssignment: async (root, args) => {
+      try {
+        const { id } = args
+        console.log(id)
+        const result = await Assignment.deleteOne({ _id: id })
+
+        if (result.deletedCount === 0) {
+          throw new Error('Assignment not found');
+        }
+
+        return true;
+      } catch (error) {
+        throw new GraphQLError('cant delete assignment', {
           extensions: {
             code: 'BAD_USER_INPUT',
             invalidArgs: args,

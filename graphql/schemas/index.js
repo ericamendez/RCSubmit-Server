@@ -35,6 +35,7 @@ const typeDefs = `
     link: String
     week: Int!
     show: Boolean!
+    assignmentType: String
   }
 
   type Query {
@@ -51,7 +52,9 @@ const typeDefs = `
       link: String
       show: Boolean!
       week: Int!
+      assignmentType: String
     ): Assignment
+    deleteAssignment(id: ID!): Boolean!
     editUserInfo(
       userID: String!
       name: String
