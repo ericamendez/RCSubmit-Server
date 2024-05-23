@@ -38,12 +38,23 @@ const typeDefs = `
     assignmentType: String
   }
 
+  type Cohort {
+    id: ID!
+    name: String!
+    startDate: String!
+    endDate: String!
+    isCurrentCohort: Boolean!
+    currentWeek: Int!
+    students: [User]
+  }
+
   type Query {
     dummy: Int
     taskCount: Int!
     getUser(id: String!): User
     getAllWeeks: [Week!]!
     getWeeksAssignments(week: Int!): [Assignment]
+    getAllCohorts: [Cohort]!
   }
 
   type Mutation {
@@ -54,7 +65,7 @@ const typeDefs = `
       week: Int!
       assignmentType: String
     ): Assignment
-    deleteAssignment(id: ID!): Boolean!
+    deleteAssignment(id: ID!): String!
     editUserInfo(
       userID: String!
       name: String
@@ -67,6 +78,11 @@ const typeDefs = `
       password: String!
       accountType: String!
     ): User
+    addCohort(
+      name: String!
+      startDate: String!
+      endDate: String!
+    ): Cohort
     login(
       username: String!
       password: String!

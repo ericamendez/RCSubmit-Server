@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import User from '../../models/user.js';
 import WeeklyAssignments from '../../models/weekly-assigments.js'
 import Assignment from '../../models/assignment.js'
+import Cohort from '../../models/cohort.js'
 import { log } from 'console';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -51,9 +52,14 @@ const resolvers = {
     getWeeksAssignments: async (root, args) => {
       const { week } = args
       const data = await Assignment.find({ week }).exec();
+
+      return data
+    },
+    getAllCohorts: async () => {
+      const data = await Cohort.find({})
       console.log(data)
       return data
-    }
+    },
   },
   Upload: GraphQLUpload,
   Mutation: {
@@ -70,8 +76,6 @@ const resolvers = {
 
       const weekly = await WeeklyAssignments.findOne({ week: week })
       weekly.assignments.push(newAssignment.description)
-
-      console.log(weekly)
 
       try {
         await newAssignment.save()
@@ -97,7 +101,7 @@ const resolvers = {
           throw new Error('Assignment not found');
         }
 
-        return true;
+        return id;
       } catch (error) {
         throw new GraphQLError('cant delete assignment', {
           extensions: {
@@ -147,6 +151,31 @@ const resolvers = {
         return newUser;
       } catch (error) {
         throw new Error(error);
+      }
+    },
+    addCohort: async (root, args) => {
+      const { name, startDate, endDate } = args
+      const newCohort = new Cohort({
+        name,
+        startDate,
+        endDate,
+        isCurrentCohort: false,
+        currentWeek: 1,
+        students: []
+      })
+
+      try {
+        await newCohort.save()
+        console.log(newCohort);
+        return newCohort
+      } catch (error) {
+        throw new GraphQLError('cant save cohort', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args,
+            error
+          }
+        })
       }
     },
     login: async (root, args) => {
