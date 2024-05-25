@@ -10,6 +10,7 @@ import WeeklyAssignments from '../../models/weekly-assigments.js'
 import Assignment from '../../models/assignment.js'
 import Cohort from '../../models/cohort.js'
 import { log } from 'console';
+import submission from '../../models/submission.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,7 +41,8 @@ const resolvers = {
         profilePicture: data.profilePicture,
         email: data.email,
         cohort: data.cohort,
-        pronouns: data.pronouns
+        pronouns: data.pronouns,
+        submissions: data.submissions
       }
 
       return send
@@ -60,6 +62,17 @@ const resolvers = {
       console.log(data)
       return data
     },
+    getCurrentCohort: async () => {
+      const data = await Cohort.findOne({ isCurrentCohort: true })
+      return data
+    },
+    getStudentShownAssignments: async (root, args) => {
+      const { cohort } = args
+      const studentsCohort = await Cohort.findOne({ name: cohort })
+      const currentWeek = studentsCohort.currentWeek
+      const data = await Assignment.find({ week: currentWeek, show: true })
+      return data
+    }
   },
   Upload: GraphQLUpload,
   Mutation: {
@@ -75,7 +88,7 @@ const resolvers = {
       })
 
       const weekly = await WeeklyAssignments.findOne({ week: week })
-      weekly.assignments.push(newAssignment.description)
+      weekly.assignments.push(newAssignment.id)
 
       try {
         await newAssignment.save()
@@ -91,6 +104,29 @@ const resolvers = {
         })
       }
     },
+    editAssignment: async (root, args) => {
+      const { id, description, link, show, assignmentType } = args
+      let assignment = await Assignment.findOne({ _id: id })
+
+      assignment.description = description ? description : assignment.description
+      assignment.link = link ? link : assignment.link
+      assignment.show = show === null ? assignment.show : show
+      assignment.accountType = assignmentType ? assignmentType : assignment.assignmentType
+
+      try {
+        await assignment.save()
+        return assignment
+      } catch (error) {
+        throw new GraphQLError('cant update assignment', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args,
+            error
+          }
+        })
+      }
+
+    },
     deleteAssignment: async (root, args) => {
       try {
         const { id } = args
@@ -104,6 +140,37 @@ const resolvers = {
         return id;
       } catch (error) {
         throw new GraphQLError('cant delete assignment', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args,
+            error
+          }
+        })
+      }
+    },
+    updateSubmissions: async (root, args) => {
+      const { userID, week, assignmentID } = args
+      const user = await User.findOne({ _id: userID }).select('-password')
+      console.log(user);
+      // an array, look for week, if it exists, update it, if not, create it
+      if (user && user.submissions.length === 0) {
+        user.submissions.push({ week, assignments: [assignmentID] })
+        console.log('iffffffff', user.submissions);
+      } else {
+        const targetSubmission = user.submissions.find(submission => submission.week === week)
+
+        targetSubmission ?
+          targetSubmission.assignments.push(assignmentID)
+          : user.submissions.push({ week, assignments: [assignmentID] })
+
+        console.log('elseeeee', targetSubmission);
+      }
+
+      try {
+        await user.save()
+        return user.submissions.find(submission => submission.week === week)
+      } catch (error) {
+        throw new GraphQLError('cant update weekly assignments', {
           extensions: {
             code: 'BAD_USER_INPUT',
             invalidArgs: args,
@@ -202,7 +269,8 @@ const resolvers = {
           username: user.username,
           id: user._id,
           accountType: user.accountType,
-          profilePicture: user.profilePicture
+          profilePicture: user.profilePicture,
+          submissions: user.submissions
         }
       } catch (error) {
         throw new Error(error);

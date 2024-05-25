@@ -11,6 +11,7 @@ const typeDefs = `
     pronouns: String
     profilePicture: String
     cohort: String
+    submissions: [Submission]
   }
   
   type Token {
@@ -48,6 +49,16 @@ const typeDefs = `
     students: [User]
   }
 
+  type Submission {
+    userID: String
+    assignmentID: String
+    assignmentType: String
+    assignmentFile: String
+    week: Int
+    link: String
+    isSubmitted: Boolean
+  }
+
   type Query {
     dummy: Int
     taskCount: Int!
@@ -55,6 +66,8 @@ const typeDefs = `
     getAllWeeks: [Week!]!
     getWeeksAssignments(week: Int!): [Assignment]
     getAllCohorts: [Cohort]!
+    getCurrentCohort: Cohort!
+    getStudentShownAssignments(cohort: String!): [Assignment]
   }
 
   type Mutation {
@@ -65,7 +78,19 @@ const typeDefs = `
       week: Int!
       assignmentType: String
     ): Assignment
+    editAssignment(
+      id: ID!
+      description: String
+      link: String
+      show: Boolean
+      assignmentType: String
+    ): Assignment
     deleteAssignment(id: ID!): String!
+    updateSubmissions(
+      userID: String!
+      week: Int!
+      assignmentID: String!
+    ): Submission
     editUserInfo(
       userID: String!
       name: String
