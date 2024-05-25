@@ -149,34 +149,64 @@ const resolvers = {
       }
     },
     updateSubmissions: async (root, args) => {
-      const { userID, week, assignmentID } = args
-      const user = await User.findOne({ _id: userID }).select('-password')
-      console.log(user);
-      // an array, look for week, if it exists, update it, if not, create it
-      if (user && user.submissions.length === 0) {
-        user.submissions.push({ week, assignments: [assignmentID] })
-        console.log('iffffffff', user.submissions);
-      } else {
-        const targetSubmission = user.submissions.find(submission => submission.week === week)
-
-        targetSubmission ?
-          targetSubmission.assignments.push(assignmentID)
-          : user.submissions.push({ week, assignments: [assignmentID] })
-
-        console.log('elseeeee', targetSubmission);
-      }
+      const { userID, week, assignmentID, isDone } = args;
+      console.log('Received args:', args);
 
       try {
-        await user.save()
-        return user.submissions.find(submission => submission.week === week)
+        const user = await User.findOne({ _id: userID }).select('-password');
+        if (!user) {
+          throw new GraphQLError('User not found', {
+            extensions: {
+              code: 'USER_NOT_FOUND',
+              invalidArgs: args,
+            }
+          });
+        }
+
+        // Initialize submissions array if it doesn't exist
+        if (!user.submissions) {
+          user.submissions = [];
+        }
+
+        if (!user.submissions.find(submission => submission.week === week)) {
+          user.submissions.push({ week, assignments: [] });
+        }
+
+        // Find the submission for the week
+        let targetSubmission = user.submissions.find(submission => submission.week === week);
+        console.log('Target submission:', targetSubmission);
+        if (!targetSubmission) {
+          if (isDone) {
+            user.submissions.push({ week, assignments: [assignmentID] });
+          }
+        } else {
+          if (isDone) {
+            if (!targetSubmission.assignments.includes(assignmentID)) {
+              console.log('Adding assignment to submission:', assignmentID);
+              targetSubmission.assignments.push(assignmentID);
+            }
+          } else {
+            console.log('Removing assignment from submission:', assignmentID);
+            const index = targetSubmission.assignments.indexOf(assignmentID);
+            if (index > -1) {
+              targetSubmission.assignments.splice(index, 1);
+            }
+          }
+        }
+        console.log('Target submission:', targetSubmission);
+
+        await user.save();
+        console.log(user.submissions);
+        return user.submissions.find(submission => submission.week === week) || { week, assignments: [] };
       } catch (error) {
-        throw new GraphQLError('cant update weekly assignments', {
+        console.error('Error updating submissions:', error);
+        throw new GraphQLError('Cannot update weekly assignments', {
           extensions: {
             code: 'BAD_USER_INPUT',
             invalidArgs: args,
             error
           }
-        })
+        });
       }
     },
     editUserInfo: async (root, args) => {

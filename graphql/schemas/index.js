@@ -86,6 +86,7 @@ const typeDefs = `
       userID: String!
       week: Int!
       assignmentID: String!
+      isDone: Boolean!
     ): Submission
     editUserInfo(
       userID: String!

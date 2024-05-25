@@ -18,7 +18,8 @@ import mongoose from 'mongoose';
 const schema = new mongoose.Schema({
   week: {
     type: Number,
-    required: true
+    required: true,
+    unique: true
   },
   assignments: {
     type: Array,

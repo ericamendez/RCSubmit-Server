@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const weeksSchema = new mongoose.Schema({
+  week: Number,
+  assignments: [String],
+});
+
 const schema = new mongoose.Schema({
   username: {
     type: String,
@@ -19,9 +24,7 @@ const schema = new mongoose.Schema({
   pronouns: String,
   profilePicture: String,
   cohort: String,
-  submissions: [
-
-  ]
+  submissions: [weeksSchema]
 })
 
 
