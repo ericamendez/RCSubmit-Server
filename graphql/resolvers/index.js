@@ -264,6 +264,7 @@ const resolvers = {
           id: user._id,
         }
 
+        console.log(user);
         return {
           value: jwt.sign(userForToken, process.env.JWT_SECRET),
           username: user.username,

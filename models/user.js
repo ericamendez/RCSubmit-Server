@@ -19,12 +19,10 @@ const schema = new mongoose.Schema({
   pronouns: String,
   profilePicture: String,
   cohort: String,
-  submissions: []
+  submissions: [
+
+  ]
 })
 
-// {
-//   type: mongoose.Schema.Types.ObjectId,
-//   ref: 'Submission'
-// }
 
 export default mongoose.model('User', schema)

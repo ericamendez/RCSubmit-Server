@@ -50,13 +50,9 @@ const typeDefs = `
   }
 
   type Submission {
-    userID: String
-    assignmentID: String
-    assignmentType: String
-    assignmentFile: String
+    id: ID!
     week: Int
-    link: String
-    isSubmitted: Boolean
+    assignments: [String]
   }
 
   type Query {
